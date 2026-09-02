@@ -269,25 +269,6 @@ def make_lstm_config(
         shutil.rmtree(cat_config_dir)
     cat_config_dir.mkdir(parents=True, exist_ok=True)
 
-    # `mean.slope` is the divide's mean terrain slope in m/km. That is already
-    # the unit and orientation the LSTM was trained on -- CAMELS `slope_mean`,
-    # mean 45.73 std 46.97 m/km -- so pass it through unchanged.
-    #
-    # It is NOT "degrees where 90 is flat". Larger values mean STEEPER terrain:
-    # Spearman(mean.slope, reach slope in m/m) = +0.78 across 819,701 CONUS
-    # divides, and median mean.slope climbs 39 -> 85 from the lowest to the
-    # highest elevation decile. The previous transform,
-    # tan(radians(|mean.slope - 90|)) * 1000, therefore inverted every divide's
-    # rank (Spearman -1.00 against its own source column) and handed flat
-    # catchments the largest slopes, while tan() diverged exactly where terrain
-    # was flattest -- producing values up to 1.6e19. That placed 68% of divides
-    # beyond 2 sigma of the training distribution and drove a 3.6x runoff
-    # overshoot against dHBV2.3 over 390,773 catchments; the divides whose slope
-    # stayed in distribution matched dHBV to a 1.01 volume ratio. Pass-through
-    # puts the median divide at z = +0.58 with no divide beyond 3 sigma.
-    #
-    # This was the behaviour before #141, which introduced the flip while
-    # fixing an unrelated elevation bug. Do not reintroduce it.
     divide_conf_df["mean_slope_mpkm"] = divide_conf_df["mean.slope"]
 
     with open(template_path, "r") as file:
