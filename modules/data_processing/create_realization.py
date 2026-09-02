@@ -269,13 +269,7 @@ def make_lstm_config(
         shutil.rmtree(cat_config_dir)
     cat_config_dir.mkdir(parents=True, exist_ok=True)
 
-    # convert the mean.slope from degrees 0-90 where 90 is flat and 0 is vertical to m/km
-    # flip 0 and 90 degree values
-    divide_conf_df["flipped_mean_slope"] = abs(divide_conf_df["mean.slope"] - 90)
-    # Convert degrees to meters per kmmeter
-    divide_conf_df["mean_slope_mpkm"] = (
-        np.tan(np.radians(divide_conf_df["flipped_mean_slope"])) * 1000
-    )
+    divide_conf_df["mean_slope_mpkm"] = divide_conf_df["mean.slope"]
 
     with open(template_path, "r") as file:
         template = file.read()
